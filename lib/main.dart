@@ -14,6 +14,81 @@ class GpadApp extends StatelessWidget {
   }
 }
 
+// tela inicial
+class ListaNotas extends StatefulWidget {
+  final List<Conteudo> _conteudos = [];
+
+  @override
+  State<StatefulWidget> createState() {
+    return ListaNotasState();
+  }
+}
+
+// state da tela inicial
+class ListaNotasState extends State<ListaNotas> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('G-PAD'),
+      ),
+      body: ListView.builder(
+        itemCount: widget._conteudos.length,
+        itemBuilder: (context, index) {
+          final conteudo = widget._conteudos[index];
+          return itemNota(context, conteudo);
+          // Nota(conteudo);
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () {
+          final Future<Conteudo> future =
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+            return CriarNota();
+          }));
+          future.then((conteudoRecebido) {
+            Future.delayed(Duration(seconds: 1), () {
+              if (conteudoRecebido != null) {
+                setState(() {
+                  widget._conteudos.add(conteudoRecebido);
+                });
+              }
+            });
+          });
+        },
+      ),
+    );
+  }
+
+  Widget itemNota(context, conteudo) {
+    return Dismissible(
+      key: Key(conteudo.toString()),
+      onDismissed: (direction) {
+        removerNota(conteudo);
+      },
+      background: deleteItem(),
+      child: Nota(conteudo),
+    );
+  }
+
+  Widget deleteItem() {
+    return Container(
+        alignment: Alignment.centerRight,
+        padding: EdgeInsets.only(right: 20),
+        color: Colors.red,
+        child: Icon(Icons.delete, color: Colors.white));
+  }
+
+  removerNota(card) {
+    if (widget._conteudos.contains(card)) {
+      //remove completamente o card
+      setState(() {
+        widget._conteudos.remove(card);
+      });
+    }
+  }
+}
 
 // tela de criação de nota
 class CriarNota extends StatelessWidget {
@@ -48,53 +123,6 @@ class CriarNota extends StatelessWidget {
   }
 }
 
-// tela inicial
-class ListaNotas extends StatefulWidget {
-  final List<Conteudo> _conteudos = [];
-
-  @override
-  State<StatefulWidget> createState() {
-    return ListaNotasState();
-  }
-}
-
-// state da tela inicial
-class ListaNotasState extends State<ListaNotas> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('G-PAD'),
-      ),
-      body: ListView.builder(
-        itemCount: widget._conteudos.length,
-        itemBuilder: (context, index) {
-          final conteudo = widget._conteudos[index];
-          return Nota(conteudo);
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () {
-          final Future<Conteudo> future =
-              Navigator.push(context, MaterialPageRoute(builder: (context) {
-            return CriarNota();
-          }));
-          future.then((conteudoRecebido) {
-            Future.delayed(Duration(seconds: 1), () {
-              if (conteudoRecebido != null) {
-                setState(() {
-                  widget._conteudos.add(conteudoRecebido);
-                });
-              }
-            });
-          });
-        },
-      ),
-    );
-  }
-}
-
 // modelo das notas
 class Nota extends StatelessWidget {
   final Conteudo _conteudo;
@@ -106,14 +134,17 @@ class Nota extends StatelessWidget {
     return Card(
       child: ListTile(
         leading: Icon(Icons.notes),
-        title: Text(_conteudo.titulo.toString(), style: TextStyle(fontSize: 20),),
-        subtitle: Text(_conteudo.nota.toString(), style: TextStyle(fontSize: 20)),
+        title: Text(
+          _conteudo.titulo.toString(),
+          style: TextStyle(fontSize: 20),
+        ),
+        subtitle:
+            Text(_conteudo.nota.toString(), style: TextStyle(fontSize: 20)),
         onTap: () => share(context, _conteudo),
       ),
     );
   }
 }
-
 
 // modelo dos conteudos das notas
 class Conteudo {
@@ -148,7 +179,6 @@ class Campo extends StatelessWidget {
     );
   }
 }
-
 
 // plugin para compartilhar as notas
 void share(BuildContext context, Conteudo conteudo) {
