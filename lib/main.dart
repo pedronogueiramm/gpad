@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:share/share.dart';
 
 void main() => runApp(GpadApp());
 
@@ -13,6 +14,8 @@ class GpadApp extends StatelessWidget {
   }
 }
 
+
+// tela de criação de nota
 class CriarNota extends StatelessWidget {
   final TextEditingController _controladorTitulo = TextEditingController();
   final TextEditingController _controladorNota = TextEditingController();
@@ -32,8 +35,10 @@ class CriarNota extends StatelessWidget {
               onPressed: () {
                 final String titulo = _controladorTitulo.text;
                 final String nota = _controladorNota.text;
-                if (titulo != null && nota != null) {
+                // verificação dos campos de titulo e nota para envio das informações para a tela inicial
+                if (titulo != "" && nota != "") {
                   final conteudoCriado = Conteudo(titulo, nota);
+                  // rota para tela inicial
                   Navigator.pop(context, conteudoCriado);
                 }
               },
@@ -43,8 +48,9 @@ class CriarNota extends StatelessWidget {
   }
 }
 
+// tela inicial
 class ListaNotas extends StatefulWidget {
-  final List<Conteudo> _conteudos = List();
+  final List<Conteudo> _conteudos = [];
 
   @override
   State<StatefulWidget> createState() {
@@ -52,6 +58,7 @@ class ListaNotas extends StatefulWidget {
   }
 }
 
+// state da tela inicial
 class ListaNotasState extends State<ListaNotas> {
   @override
   Widget build(BuildContext context) {
@@ -75,11 +82,10 @@ class ListaNotasState extends State<ListaNotas> {
           }));
           future.then((conteudoRecebido) {
             Future.delayed(Duration(seconds: 1), () {
-              if(conteudoRecebido != null){
-                setState((){
+              if (conteudoRecebido != null) {
+                setState(() {
                   widget._conteudos.add(conteudoRecebido);
                 });
-                
               }
             });
           });
@@ -89,6 +95,7 @@ class ListaNotasState extends State<ListaNotas> {
   }
 }
 
+// modelo das notas
 class Nota extends StatelessWidget {
   final Conteudo _conteudo;
 
@@ -97,14 +104,18 @@ class Nota extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-        child: ListTile(
-      leading: Icon(Icons.notes),
-      title: Text(_conteudo.titulo.toString()),
-      subtitle: Text(_conteudo.nota.toString()),
-    ));
+      child: ListTile(
+        leading: Icon(Icons.notes),
+        title: Text(_conteudo.titulo.toString(), style: TextStyle(fontSize: 20),),
+        subtitle: Text(_conteudo.nota.toString(), style: TextStyle(fontSize: 20)),
+        onTap: () => share(context, _conteudo),
+      ),
+    );
   }
 }
 
+
+// modelo dos conteudos das notas
 class Conteudo {
   final String titulo;
   final String nota;
@@ -117,6 +128,7 @@ class Conteudo {
   }
 }
 
+// modelo do campo de adição de uma nova nota
 class Campo extends StatelessWidget {
   final TextEditingController _controlador;
   final String _rotulo;
@@ -135,4 +147,14 @@ class Campo extends StatelessWidget {
       ),
     );
   }
+}
+
+
+// plugin para compartilhar as notas
+void share(BuildContext context, Conteudo conteudo) {
+  final RenderBox box = context.findRenderObject();
+
+  Share.share("${conteudo.titulo} - ${conteudo.nota}",
+      subject: conteudo.nota,
+      sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size);
 }
