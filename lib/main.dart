@@ -37,7 +37,6 @@ class ListaNotasState extends State<ListaNotas> {
         itemBuilder: (context, index) {
           final conteudo = widget._conteudos[index];
           return itemNota(context, conteudo);
-          // Nota(conteudo);
         },
       ),
       floatingActionButton: FloatingActionButton(
@@ -61,6 +60,7 @@ class ListaNotasState extends State<ListaNotas> {
     );
   }
 
+  // slide de delete da Nota()
   Widget itemNota(context, conteudo) {
     return Dismissible(
       key: Key(conteudo.toString()),
@@ -72,6 +72,7 @@ class ListaNotasState extends State<ListaNotas> {
     );
   }
 
+  // background para animação de deletar uma nota
   Widget deleteItem() {
     return Container(
         alignment: Alignment.centerRight,
@@ -80,9 +81,9 @@ class ListaNotasState extends State<ListaNotas> {
         child: Icon(Icons.delete, color: Colors.white));
   }
 
+  //remove completamente o card
   removerNota(card) {
     if (widget._conteudos.contains(card)) {
-      //remove completamente o card
       setState(() {
         widget._conteudos.remove(card);
       });
